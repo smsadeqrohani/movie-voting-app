@@ -197,6 +197,56 @@ export const getAllMovies = query({
   },
 });
 
+// Get movies for main page with pagination
+export const getMoviesPaginated = query({
+  args: {
+    page: v.number(),
+    limit: v.number(),
+  },
+  handler: async (ctx: any, args) => {
+    let query = ctx.db.query("movies");
+    
+    // Get all movies first (for filtering and counting)
+    const allMovies = await query.collect();
+    
+    // Filter out movies that have been reviewed (have any special property set to true)
+    const unreviewedMovies = allMovies.filter((movie: Doc<"movies">) => 
+      movie.isDouble !== true && 
+      movie.hasSubtitle !== true && 
+      movie.hasContentIssue !== true
+    );
+    
+    // Sort by votes (descending) then by addedAt (ascending - earlier requests first)
+    const sortedMovies = unreviewedMovies.sort((a: Doc<"movies">, b: Doc<"movies">) => {
+      // First sort by votes (higher votes first)
+      if (a.votes !== b.votes) {
+        return b.votes - a.votes;
+      }
+      // If votes are equal, sort by request time (earlier requests first)
+      return a.addedAt - b.addedAt;
+    });
+    
+    // Calculate pagination
+    const totalCount = sortedMovies.length;
+    const totalPages = Math.ceil(totalCount / args.limit);
+    const startIndex = (args.page - 1) * args.limit;
+    const endIndex = startIndex + args.limit;
+    const paginatedMovies = sortedMovies.slice(startIndex, endIndex);
+    
+    return {
+      movies: paginatedMovies,
+      pagination: {
+        currentPage: args.page,
+        totalPages,
+        totalCount,
+        limit: args.limit,
+        hasNextPage: args.page < totalPages,
+        hasPrevPage: args.page > 1,
+      }
+    };
+  },
+});
+
 // Get movie by IMDb ID
 export const getMovieByImdbId = query({
   args: { imdbId: v.string() },
@@ -403,14 +453,14 @@ export const getAllMoviesForAdmin = query({
       .query("movies")
       .collect();
     
-    // Sort by votes (descending) then by addedAt (ascending - earlier requests first)
+    // Sort by addedAt (descending - newest first) then by votes (descending)
     return movies.sort((a: Doc<"movies">, b: Doc<"movies">) => {
-      // First sort by votes (higher votes first)
-      if (a.votes !== b.votes) {
-        return b.votes - a.votes;
+      // First sort by date (newest first)
+      if (a.addedAt !== b.addedAt) {
+        return b.addedAt - a.addedAt;
       }
-      // If votes are equal, sort by request time (earlier requests first)
-      return a.addedAt - b.addedAt;
+      // If dates are equal, sort by votes (higher votes first)
+      return b.votes - a.votes;
     });
   },
 });
@@ -428,12 +478,14 @@ export const getMoviesForAdminPaginated = query({
     // Get all movies first (for filtering and counting)
     const allMovies = await query.collect();
     
-    // Sort by votes (descending) then by addedAt (ascending)
+    // Sort by addedAt (descending - newest first) then by votes (descending)
     const sortedMovies = allMovies.sort((a: Doc<"movies">, b: Doc<"movies">) => {
-      if (a.votes !== b.votes) {
-        return b.votes - a.votes;
+      // First sort by date (newest first)
+      if (a.addedAt !== b.addedAt) {
+        return b.addedAt - a.addedAt;
       }
-      return a.addedAt - b.addedAt;
+      // If dates are equal, sort by votes (higher votes first)
+      return b.votes - a.votes;
     });
     
     // Filter by search term if provided
@@ -494,6 +546,56 @@ export const getMoviesWithSpecialProperties = query({
       // If votes are equal, sort by request time (earlier requests first)
       return a.addedAt - b.addedAt;
     });
+  },
+});
+
+// Get movies with special properties with pagination
+export const getSpecialMoviesPaginated = query({
+  args: {
+    page: v.number(),
+    limit: v.number(),
+  },
+  handler: async (ctx: any, args) => {
+    let query = ctx.db.query("movies");
+    
+    // Get all movies first (for filtering and counting)
+    const allMovies = await query.collect();
+    
+    // Filter movies that have at least one special property set to true
+    const specialMovies = allMovies.filter((movie: Doc<"movies">) => 
+      movie.isDouble === true || 
+      movie.hasSubtitle === true || 
+      movie.hasContentIssue === true
+    );
+    
+    // Sort by votes (descending) then by addedAt (ascending - earlier requests first)
+    const sortedMovies = specialMovies.sort((a: Doc<"movies">, b: Doc<"movies">) => {
+      // First sort by votes (higher votes first)
+      if (a.votes !== b.votes) {
+        return b.votes - a.votes;
+      }
+      // If votes are equal, sort by request time (earlier requests first)
+      return a.addedAt - b.addedAt;
+    });
+    
+    // Calculate pagination
+    const totalCount = sortedMovies.length;
+    const totalPages = Math.ceil(totalCount / args.limit);
+    const startIndex = (args.page - 1) * args.limit;
+    const endIndex = startIndex + args.limit;
+    const paginatedMovies = sortedMovies.slice(startIndex, endIndex);
+    
+    return {
+      movies: paginatedMovies,
+      pagination: {
+        currentPage: args.page,
+        totalPages,
+        totalCount,
+        limit: args.limit,
+        hasNextPage: args.page < totalPages,
+        hasPrevPage: args.page > 1,
+      }
+    };
   },
 });
 
