@@ -29,11 +29,21 @@ interface Movie {
 }
 
 const AdminPage: React.FC = () => {
-  const movies = useQuery(api.movies.getAllMoviesForAdmin);
-  const updateSpecialProperties = useMutation(api.movies.updateMovieSpecialProperties);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(20); // تعداد آیتم در هر صفحه
+  
+  // Use server-side pagination
+  const moviesData = useQuery(api.movies.getMoviesForAdminPaginated, {
+    page: currentPage,
+    limit: itemsPerPage,
+    searchTerm: searchTerm || undefined,
+  });
+  
+  const updateSpecialProperties = useMutation(api.movies.updateMovieSpecialProperties);
+  
+  // Get total count for stats (separate query for better performance)
+  const allMovies = useQuery(api.movies.getAllMoviesForAdmin);
 
   const handleUpdateSpecialProperties = async (
     movieId: string, 
@@ -75,27 +85,9 @@ const AdminPage: React.FC = () => {
     return num.toLocaleString('fa-IR');
   };
 
-  // Filter movies based on search term (limited to title, year, and IMDb ID)
-  const filteredMovies = useMemo(() => {
-    if (!movies) return [];
-    if (!searchTerm.trim()) return movies;
-    
-    const searchLower = searchTerm.toLowerCase();
-    return movies.filter((movie: Movie) => {
-      // جستجو فقط در عنوان، سال و IMDb ID
-      return (
-        movie.title.toLowerCase().includes(searchLower) ||
-        movie.year.toString().includes(searchTerm) ||
-        movie.imdbId.toLowerCase().includes(searchLower)
-      );
-    });
-  }, [movies, searchTerm]);
-
-  // Pagination logic
-  const totalPages = Math.ceil(filteredMovies.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedMovies = filteredMovies.slice(startIndex, endIndex);
+  // Extract data from server response
+  const movies = moviesData?.movies || [];
+  const pagination = moviesData?.pagination;
 
   // Reset to first page when search term changes
   const handleSearchChange = useCallback((value: string) => {
@@ -109,7 +101,7 @@ const AdminPage: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  if (movies === undefined) {
+  if (moviesData === undefined || allMovies === undefined) {
     return (
       <div className="admin-loading">
         <Loader2 className="animate-spin" size={32} />
@@ -147,19 +139,19 @@ const AdminPage: React.FC = () => {
         <div className="search-results-info">
           {searchTerm ? (
             <>
-              {formatNumber(filteredMovies.length)} نتیجه از {formatNumber(movies.length)} فیلم
-              {filteredMovies.length > itemsPerPage && (
+              {formatNumber(pagination?.totalCount || 0)} نتیجه از {formatNumber(allMovies.length)} فیلم
+              {(pagination?.totalPages || 0) > 1 && (
                 <span className="pagination-info">
-                  {' '}• صفحه {formatNumber(currentPage)} از {formatNumber(totalPages)}
+                  {' '}• صفحه {formatNumber(pagination?.currentPage || 1)} از {formatNumber(pagination?.totalPages || 1)}
                 </span>
               )}
             </>
           ) : (
             <>
-              {formatNumber(movies.length)} فیلم کل
-              {movies.length > itemsPerPage && (
+              {formatNumber(allMovies.length)} فیلم کل
+              {(pagination?.totalPages || 0) > 1 && (
                 <span className="pagination-info">
-                  {' '}• صفحه {formatNumber(currentPage)} از {formatNumber(totalPages)}
+                  {' '}• صفحه {formatNumber(pagination?.currentPage || 1)} از {formatNumber(pagination?.totalPages || 1)}
                 </span>
               )}
             </>
@@ -170,17 +162,17 @@ const AdminPage: React.FC = () => {
       <div className="admin-stats">
         <div className="stat-card">
           <h3>کل محتواها</h3>
-          <span className="stat-number">{formatNumber(movies.length)}</span>
+          <span className="stat-number">{formatNumber(allMovies.length)}</span>
         </div>
         <div className="stat-card">
           <h3>در حال بررسی</h3>
-          <span className="stat-number">{formatNumber(movies.filter((m: Movie) => 
+          <span className="stat-number">{formatNumber(allMovies.filter((m: Movie) => 
             m.isDouble !== true && m.hasSubtitle !== true && m.hasContentIssue !== true
           ).length)}</span>
         </div>
         <div className="stat-card">
           <h3>بررسی شده</h3>
-          <span className="stat-number">{formatNumber(movies.filter((m: Movie) => 
+          <span className="stat-number">{formatNumber(allMovies.filter((m: Movie) => 
             m.isDouble === true || m.hasSubtitle === true || m.hasContentIssue === true
           ).length)}</span>
         </div>
@@ -199,7 +191,7 @@ const AdminPage: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {paginatedMovies.map((movie: Movie) => (
+            {movies.map((movie: Movie) => (
               <tr key={movie._id}>
                 <td className="movie-title-cell">
                   <div className="movie-title-info">
@@ -285,24 +277,24 @@ const AdminPage: React.FC = () => {
       </div>
 
       {/* Pagination Component */}
-      {totalPages > 1 && (
+      {(pagination?.totalPages || 0) > 1 && (
         <div className="pagination-container">
           <div className="pagination">
             <button
               className="pagination-btn"
               onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
+              disabled={!pagination?.hasPrevPage}
             >
               <ChevronRight size={16} />
               قبلی
             </button>
             
             <div className="pagination-numbers">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
+              {Array.from({ length: pagination?.totalPages || 0 }, (_, i) => i + 1).map(page => {
                 // Show first few pages, last few pages, and pages around current page
                 const shouldShow = 
                   page <= 3 || 
-                  page >= totalPages - 2 || 
+                  page >= (pagination?.totalPages || 0) - 2 || 
                   (page >= currentPage - 1 && page <= currentPage + 1);
                 
                 if (!shouldShow) {
@@ -310,7 +302,7 @@ const AdminPage: React.FC = () => {
                   if (page === 4 && currentPage > 5) {
                     return <span key={page} className="pagination-ellipsis">...</span>;
                   }
-                  if (page === totalPages - 3 && currentPage < totalPages - 4) {
+                  if (page === (pagination?.totalPages || 0) - 3 && currentPage < (pagination?.totalPages || 0) - 4) {
                     return <span key={page} className="pagination-ellipsis">...</span>;
                   }
                   return null;
@@ -331,7 +323,7 @@ const AdminPage: React.FC = () => {
             <button
               className="pagination-btn"
               onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
+              disabled={!pagination?.hasNextPage}
             >
               بعدی
               <ChevronLeft size={16} />

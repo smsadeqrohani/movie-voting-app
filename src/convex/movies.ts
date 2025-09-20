@@ -415,6 +415,61 @@ export const getAllMoviesForAdmin = query({
   },
 });
 
+// Get movies for admin with pagination and search (server-side)
+export const getMoviesForAdminPaginated = query({
+  args: {
+    page: v.number(),
+    limit: v.number(),
+    searchTerm: v.optional(v.string()),
+  },
+  handler: async (ctx: any, args) => {
+    let query = ctx.db.query("movies");
+    
+    // Get all movies first (for filtering and counting)
+    const allMovies = await query.collect();
+    
+    // Sort by votes (descending) then by addedAt (ascending)
+    const sortedMovies = allMovies.sort((a: Doc<"movies">, b: Doc<"movies">) => {
+      if (a.votes !== b.votes) {
+        return b.votes - a.votes;
+      }
+      return a.addedAt - b.addedAt;
+    });
+    
+    // Filter by search term if provided
+    let filteredMovies = sortedMovies;
+    if (args.searchTerm && args.searchTerm.trim()) {
+      const searchLower = args.searchTerm.toLowerCase().trim();
+      filteredMovies = sortedMovies.filter((movie: Doc<"movies">) => {
+        return (
+          movie.title.toLowerCase().includes(searchLower) ||
+          movie.year.toString().includes(args.searchTerm || '') ||
+          movie.imdbId.toLowerCase().includes(searchLower)
+        );
+      });
+    }
+    
+    // Calculate pagination
+    const totalCount = filteredMovies.length;
+    const totalPages = Math.ceil(totalCount / args.limit);
+    const startIndex = (args.page - 1) * args.limit;
+    const endIndex = startIndex + args.limit;
+    const paginatedMovies = filteredMovies.slice(startIndex, endIndex);
+    
+    return {
+      movies: paginatedMovies,
+      pagination: {
+        currentPage: args.page,
+        totalPages,
+        totalCount,
+        limit: args.limit,
+        hasNextPage: args.page < totalPages,
+        hasPrevPage: args.page > 1,
+      }
+    };
+  },
+});
+
 // Get movies with special properties (any of the three flags set to true)
 export const getMoviesWithSpecialProperties = query({
   args: {},
