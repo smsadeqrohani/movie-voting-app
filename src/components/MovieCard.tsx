@@ -140,35 +140,43 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onVote }) => {
           )}
         </div>
         
-        {/* Vote count - prominently displayed */}
-        <div className="vote-section" onClick={onVote}>
-          <div className="vote-count">
-            <Heart size={18} className="vote-icon" />
-            <span className="vote-number">{formatNumber(movie.votes)}</span>
-            <span className="vote-label">رأی</span>
+        {/* Vote count - beautiful and prominent */}
+        <div className="beautiful-vote-section" onClick={onVote}>
+          <div className="vote-content">
+            <Heart size={20} className="vote-icon" />
+            <div className="vote-text">
+              <span className="vote-number">{formatNumber(movie.votes)}</span>
+              <span className="vote-label">رأی</span>
+            </div>
           </div>
         </div>
         
-        {/* Special Properties Labels */}
-        {(movie.isDouble || movie.hasSubtitle || movie.hasContentIssue) && (
-          <div className="special-labels">
-            {movie.isDouble && (
-              <span className="special-label" style={{ backgroundColor: '#10b981' }}>
-                دوبله اضافه شد
-              </span>
-            )}
-            {movie.hasSubtitle && (
-              <span className="special-label" style={{ backgroundColor: '#3b82f6' }}>
-                زیرنویس اضافه شد
-              </span>
-            )}
-            {movie.hasContentIssue && (
-              <span className="special-label" style={{ backgroundColor: '#ef4444' }}>
-                مشکل محتوایی دارد
-              </span>
-            )}
-          </div>
-        )}
+        {/* Status Labels */}
+        <div className="status-labels">
+          {(movie.isDouble || movie.hasSubtitle || movie.hasContentIssue) ? (
+            <>
+              {movie.isDouble && (
+                <span className="status-label" style={{ backgroundColor: '#10b981' }}>
+                  دوبله اضافه شد
+                </span>
+              )}
+              {movie.hasSubtitle && (
+                <span className="status-label" style={{ backgroundColor: '#3b82f6' }}>
+                  زیرنویس اضافه شد
+                </span>
+              )}
+              {movie.hasContentIssue && (
+                <span className="status-label" style={{ backgroundColor: '#ef4444' }}>
+                  مشکل محتوایی دارد
+                </span>
+              )}
+            </>
+          ) : (
+            <span className="status-label waiting" style={{ backgroundColor: '#6b7280' }}>
+              منتظر بررسی
+            </span>
+          )}
+        </div>
         
         
         <div className="movie-footer">

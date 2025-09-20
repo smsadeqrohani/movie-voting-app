@@ -161,29 +161,35 @@ const SpecialMovieCard: React.FC<SpecialMovieCardProps> = ({ movie, onVote }) =>
           )}
         </div>
         
-        {/* Vote count - prominently displayed */}
-        <div className="vote-section" onClick={onVote}>
-          <div className="vote-count">
-            <Heart size={18} className="vote-icon" />
-            <span className="vote-number">{formatNumber(movie.votes)}</span>
-            <span className="vote-label">رأی</span>
+        {/* Vote count - beautiful and prominent */}
+        <div className="beautiful-vote-section" onClick={onVote}>
+          <div className="vote-content">
+            <Heart size={20} className="vote-icon" />
+            <div className="vote-text">
+              <span className="vote-number">{formatNumber(movie.votes)}</span>
+              <span className="vote-label">رأی</span>
+            </div>
           </div>
         </div>
         
-        {/* Special Properties Labels */}
-        {specialLabels.length > 0 && (
-          <div className="special-labels">
-            {specialLabels.map((label, index) => (
+        {/* Status Labels */}
+        <div className="status-labels">
+          {specialLabels.length > 0 ? (
+            specialLabels.map((label, index) => (
               <span 
                 key={index} 
-                className="special-label"
+                className="status-label"
                 style={{ backgroundColor: label.color }}
               >
                 {label.text}
               </span>
-            ))}
-          </div>
-        )}
+            ))
+          ) : (
+            <span className="status-label waiting" style={{ backgroundColor: '#6b7280' }}>
+              منتظر بررسی
+            </span>
+          )}
+        </div>
         
         
         <div className="movie-footer">

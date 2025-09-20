@@ -168,30 +168,54 @@
   color: var(--primary-color);
 }
 
-/* Vote section - prominently displayed */
-.vote-section {
-  margin: 0.3rem 0;
-  padding: 0.4rem;
-  background: linear-gradient(135deg, rgba(168, 35, 60, 0.1), rgba(196, 45, 74, 0.05));
-  border: 1px solid rgba(168, 35, 60, 0.2);
-  border-radius: 6px;
-  text-align: center;
+/* Beautiful vote section */
+.beautiful-vote-section {
+  margin: 0.5rem 0;
+  padding: 0.8rem;
+  background: linear-gradient(135deg, rgba(168, 35, 60, 0.15), rgba(196, 45, 74, 0.1));
+  border: 2px solid rgba(168, 35, 60, 0.3);
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
-}
-
-.vote-section:hover {
-  background: linear-gradient(135deg, rgba(168, 35, 60, 0.15), rgba(196, 45, 74, 0.1));
-  border-color: rgba(168, 35, 60, 0.3);
-  transform: scale(1.02);
-}
-
-.vote-count {
+  position: relative;
+  overflow: hidden;
+  min-height: 3.5rem; /* Fixed height to ensure all vote boxes are the same size */
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+}
+
+.beautiful-vote-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.6s;
+}
+
+.beautiful-vote-section:hover {
+  background: linear-gradient(135deg, rgba(168, 35, 60, 0.25), rgba(196, 45, 74, 0.2));
+  border-color: rgba(168, 35, 60, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(168, 35, 60, 0.3);
+}
+
+.beautiful-vote-section:hover::before {
+  left: 100%;
+}
+
+.vote-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
 }
 
 .vote-icon {
@@ -200,8 +224,16 @@
   filter: drop-shadow(0 2px 4px rgba(168, 35, 60, 0.4));
 }
 
+.vote-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  min-width: 2rem; /* Ensure consistent width for vote text */
+}
+
 .vote-number {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   font-weight: 900;
   color: var(--primary-color);
   text-shadow: 0 2px 4px rgba(168, 35, 60, 0.3);
@@ -209,10 +241,11 @@
 }
 
 .vote-label {
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.8rem;
+  font-weight: 700;
   color: var(--text-primary);
-  margin-right: 0.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 @keyframes heartbeat {
@@ -277,12 +310,21 @@
     font-size: 0.85rem;
   }
   
+  .beautiful-vote-section {
+    padding: 0.6rem;
+    min-height: 3.2rem; /* Slightly smaller on tablet but still fixed */
+  }
+  
+  .vote-content {
+    gap: 0.6rem;
+  }
+  
   .vote-number {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
   }
   
   .vote-label {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 }
 
@@ -304,37 +346,38 @@
     gap: 0.5rem;
   }
   
+  .beautiful-vote-section {
+    padding: 0.5rem;
+    min-height: 3rem; /* Fixed height on mobile too */
+  }
+  
+  .vote-content {
+    gap: 0.5rem;
+  }
+  
   .vote-number {
-    font-size: 1.6rem;
+    font-size: 1.3rem;
   }
   
   .vote-label {
-    font-size: 0.9rem;
-  }
-  
-  .vote-section {
-    padding: 0.75rem;
+    font-size: 0.8rem;
   }
 }
 
-/* Special Movie Card Styles */
+/* Special Movie Card Styles - now same as regular cards */
 .special-movie-card {
-  border: 2px solid var(--primary-color);
-  box-shadow: 0 4px 20px rgba(168, 35, 60, 0.2);
+  /* Same styling as regular movie cards */
 }
 
-.special-movie-card:hover {
-  box-shadow: 0 8px 30px rgba(168, 35, 60, 0.3);
-}
-
-.special-labels {
+.status-labels {
   display: flex;
   flex-wrap: wrap;
   gap: 0.3rem;
   margin: 0.3rem 0;
+  min-height: 1.5rem; /* Fixed height to ensure consistent card sizes */
 }
 
-.special-label {
+.status-label {
   padding: 0.2rem 0.5rem;
   border-radius: 12px;
   font-size: 0.7rem;
@@ -342,5 +385,9 @@
   color: white;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.status-label.waiting {
+  background: #6b7280 !important;
 }
 
