@@ -3,7 +3,6 @@ import { useMutation } from 'convex/react';
 import { toast } from 'react-toastify';
 import { api } from '../convex/_generated/api';
 import { extractImdbId, isValidImdbUrl } from '../utils/imdbUtils';
-import { getSessionId } from '../utils/sessionUtils';
 import { getCleanErrorMessage } from '../utils/errorUtils';
 import { fetchMovieData } from '../services/movieService';
 import { Search, Plus, Loader2 } from 'lucide-react';

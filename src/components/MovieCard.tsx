@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, ExternalLink, Calendar, Star, Users } from 'lucide-react';
+import { Heart, ExternalLink, Calendar, Star } from 'lucide-react';
 import moment from 'moment-jalaali';
 import './MovieCard.css';
 
