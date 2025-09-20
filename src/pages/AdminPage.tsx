@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
 import { api } from '../convex/_generated/api';
 import { getCleanErrorMessage } from '../utils/errorUtils';
-import { Loader2, Check, X, ExternalLink, Home } from 'lucide-react';
+import { Loader2, Check, X, ExternalLink, Home, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import moment from 'moment-jalaali';
 import ThemeToggle from '../components/ThemeToggle';
 import './AdminPage.css';
@@ -31,6 +31,9 @@ interface Movie {
 const AdminPage: React.FC = () => {
   const movies = useQuery(api.movies.getAllMoviesForAdmin);
   const updateSpecialProperties = useMutation(api.movies.updateMovieSpecialProperties);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(20); // تعداد آیتم در هر صفحه
 
   const handleUpdateSpecialProperties = async (
     movieId: string, 
@@ -72,6 +75,40 @@ const AdminPage: React.FC = () => {
     return num.toLocaleString('fa-IR');
   };
 
+  // Filter movies based on search term (limited to title, year, and IMDb ID)
+  const filteredMovies = useMemo(() => {
+    if (!movies) return [];
+    if (!searchTerm.trim()) return movies;
+    
+    const searchLower = searchTerm.toLowerCase();
+    return movies.filter((movie: Movie) => {
+      // جستجو فقط در عنوان، سال و IMDb ID
+      return (
+        movie.title.toLowerCase().includes(searchLower) ||
+        movie.year.toString().includes(searchTerm) ||
+        movie.imdbId.toLowerCase().includes(searchLower)
+      );
+    });
+  }, [movies, searchTerm]);
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredMovies.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedMovies = filteredMovies.slice(startIndex, endIndex);
+
+  // Reset to first page when search term changes
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+  }, []);
+
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+    // Scroll to top of table
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   if (movies === undefined) {
     return (
       <div className="admin-loading">
@@ -94,6 +131,40 @@ const AdminPage: React.FC = () => {
       <div className="admin-header">
         <h1>پنل مدیریت</h1>
         <p>مدیریت محتوای درخواستی</p>
+      </div>
+
+      <div className="search-container">
+        <div className="search-box">
+          <Search className="search-icon" size={20} />
+          <input
+            type="text"
+            placeholder="جستجو در نام فیلم، سال یا IMDb ID..."
+            value={searchTerm}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            className="search-input"
+          />
+        </div>
+        <div className="search-results-info">
+          {searchTerm ? (
+            <>
+              {formatNumber(filteredMovies.length)} نتیجه از {formatNumber(movies.length)} فیلم
+              {filteredMovies.length > itemsPerPage && (
+                <span className="pagination-info">
+                  {' '}• صفحه {formatNumber(currentPage)} از {formatNumber(totalPages)}
+                </span>
+              )}
+            </>
+          ) : (
+            <>
+              {formatNumber(movies.length)} فیلم کل
+              {movies.length > itemsPerPage && (
+                <span className="pagination-info">
+                  {' '}• صفحه {formatNumber(currentPage)} از {formatNumber(totalPages)}
+                </span>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       <div className="admin-stats">
@@ -128,7 +199,7 @@ const AdminPage: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {movies.map((movie: Movie) => (
+            {paginatedMovies.map((movie: Movie) => (
               <tr key={movie._id}>
                 <td className="movie-title-cell">
                   <div className="movie-title-info">
@@ -212,6 +283,62 @@ const AdminPage: React.FC = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination Component */}
+      {totalPages > 1 && (
+        <div className="pagination-container">
+          <div className="pagination">
+            <button
+              className="pagination-btn"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              <ChevronRight size={16} />
+              قبلی
+            </button>
+            
+            <div className="pagination-numbers">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
+                // Show first few pages, last few pages, and pages around current page
+                const shouldShow = 
+                  page <= 3 || 
+                  page >= totalPages - 2 || 
+                  (page >= currentPage - 1 && page <= currentPage + 1);
+                
+                if (!shouldShow) {
+                  // Show ellipsis
+                  if (page === 4 && currentPage > 5) {
+                    return <span key={page} className="pagination-ellipsis">...</span>;
+                  }
+                  if (page === totalPages - 3 && currentPage < totalPages - 4) {
+                    return <span key={page} className="pagination-ellipsis">...</span>;
+                  }
+                  return null;
+                }
+                
+                return (
+                  <button
+                    key={page}
+                    className={`pagination-number ${currentPage === page ? 'active' : ''}`}
+                    onClick={() => handlePageChange(page)}
+                  >
+                    {formatNumber(page)}
+                  </button>
+                );
+              })}
+            </div>
+            
+            <button
+              className="pagination-btn"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              بعدی
+              <ChevronLeft size={16} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
