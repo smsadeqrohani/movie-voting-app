@@ -48,26 +48,31 @@ body {
   left: 1rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
   z-index: 1000;
 }
 
 .admin-login-btn {
-  padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, var(--primary-color), #c42d4a);
-  color: white;
+  padding: 0.4rem 0.8rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
   text-decoration: none;
-  border-radius: 25px;
+  border-radius: 20px;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(168, 35, 60, 0.3);
-  border: none;
+  box-shadow: var(--shadow);
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .admin-login-btn:hover {
-  background: linear-gradient(135deg, #c42d4a, var(--primary-color));
+  background: linear-gradient(135deg, var(--primary-color), #c42d4a);
+  color: white;
+  border-color: var(--primary-color);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(168, 35, 60, 0.4);
 }
@@ -188,8 +193,8 @@ body {
   }
   
   .admin-login-btn {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
   }
 }
 

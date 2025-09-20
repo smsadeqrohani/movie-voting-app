@@ -1,10 +1,12 @@
 import React from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { toast } from 'react-toastify';
+import { Link } from 'react-router-dom';
 import { api } from '../convex/_generated/api';
 import { getCleanErrorMessage } from '../utils/errorUtils';
-import { Loader2, Check, X, ExternalLink } from 'lucide-react';
+import { Loader2, Check, X, ExternalLink, Home } from 'lucide-react';
 import moment from 'moment-jalaali';
+import ThemeToggle from '../components/ThemeToggle';
 import './AdminPage.css';
 
 interface Movie {
@@ -81,6 +83,14 @@ const AdminPage: React.FC = () => {
 
   return (
     <div className="admin-page">
+      <div className="header-controls">
+        <Link to="/" className="back-to-main-btn">
+          <Home size={16} />
+          بازگشت به صفحه اصلی
+        </Link>
+        <ThemeToggle />
+      </div>
+      
       <div className="admin-header">
         <h1>پنل مدیریت</h1>
         <p>مدیریت محتوای درخواستی</p>

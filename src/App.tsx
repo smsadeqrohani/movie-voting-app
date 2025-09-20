@@ -25,17 +25,14 @@ const MainContent: React.FC = () => {
   return (
     <div className="App" dir="rtl">
       <div className="header-controls">
-        <ThemeToggle />
         <Link to="/admin" className="admin-login-btn">
           ورود به پنل مدیریت
         </Link>
+        <ThemeToggle />
       </div>
       <header className="app-header">
         <h1 className="app-title">سیستم درخواست محتوا</h1>
         <p className="app-subtitle">لینک IMDb فیلم یا سریال مورد نظر خود را وارد کنید</p>
-        <nav className="main-navigation">
-          <Link to="/" className="nav-link">صفحه اصلی</Link>
-        </nav>
       </header>
       
       <main className="app-main">
