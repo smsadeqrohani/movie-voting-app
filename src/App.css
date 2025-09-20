@@ -58,7 +58,45 @@ body {
 .app-subtitle {
   font-size: 1.1rem;
   color: var(--text-secondary);
-  margin-bottom: 0;
+  margin-bottom: 1rem;
+}
+
+.main-navigation {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.nav-link {
+  padding: 0.5rem 1rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: 25px;
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow);
+}
+
+.nav-link:hover {
+  background: var(--border-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.nav-link.admin-link {
+  background: linear-gradient(135deg, var(--primary-color), #c42d4a);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.nav-link.admin-link:hover {
+  background: linear-gradient(135deg, #c42d4a, var(--primary-color));
+  box-shadow: 0 4px 15px rgba(168, 35, 60, 0.3);
 }
 
 .app-main {
@@ -102,6 +140,15 @@ body {
   
   .app-subtitle {
     font-size: 1rem;
+  }
+  
+  .main-navigation {
+    gap: 0.5rem;
+  }
+  
+  .nav-link {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
   }
 }
 

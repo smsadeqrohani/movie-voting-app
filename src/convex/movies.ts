@@ -395,6 +395,26 @@ export const getMovieById = query({
   },
 });
 
+// Get all movies for admin (including reviewed ones)
+export const getAllMoviesForAdmin = query({
+  args: {},
+  handler: async (ctx: any) => {
+    const movies = await ctx.db
+      .query("movies")
+      .collect();
+    
+    // Sort by votes (descending) then by addedAt (ascending - earlier requests first)
+    return movies.sort((a: Doc<"movies">, b: Doc<"movies">) => {
+      // First sort by votes (higher votes first)
+      if (a.votes !== b.votes) {
+        return b.votes - a.votes;
+      }
+      // If votes are equal, sort by request time (earlier requests first)
+      return a.addedAt - b.addedAt;
+    });
+  },
+});
+
 // Get movies with special properties (any of the three flags set to true)
 export const getMoviesWithSpecialProperties = query({
   args: {},
