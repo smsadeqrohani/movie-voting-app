@@ -221,6 +221,17 @@ export const addMovieWithTMDB = action({
       ...movieData,
     });
     
+    // Auto-vote for the person who added the movie
+    try {
+      await ctx.runMutation(api.movies.voteForMovie, {
+        movieId: movieId,
+        sessionId: "auto-vote-adder", // Special session ID for auto-vote
+      });
+    } catch (error) {
+      // If auto-vote fails, don't fail the whole operation
+      console.log("Auto-vote failed (this is normal):", error);
+    }
+    
     return movieId;
   },
 });
@@ -273,7 +284,8 @@ export const voteForMovie = mutation({
     const twentyFourHoursAgo = now - (24 * 60 * 60 * 1000);
     
     // Check if session already voted for this movie in the last 24 hours
-    if (args.sessionId) {
+    // Skip this check for auto-vote
+    if (args.sessionId && args.sessionId !== "auto-vote-adder") {
       const recentVote = await ctx.db
         .query("votes")
         .withIndex("by_movie_and_session", (q) => 

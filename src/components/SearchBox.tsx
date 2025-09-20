@@ -42,7 +42,7 @@ const SearchBox: React.FC = () => {
       
       setUrl('');
       setError('');
-      toast.success('محتوای مورد نظر با موفقیت اضافه شد! 🎬');
+      toast.success('محتوای مورد نظر با موفقیت اضافه شد و رأی شما ثبت شد! 🎬❤️');
     } catch (err: any) {
       console.error('Error adding movie:', err);
       const cleanMessage = getCleanErrorMessage(err);
