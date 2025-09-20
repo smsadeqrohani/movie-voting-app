@@ -31,6 +31,10 @@ export function getCleanErrorMessage(error: any): string {
   if (message.includes('محتوای مورد نظر در TMDB یافت نشد')) {
     return 'محتوای مورد نظر در TMDB یافت نشد. لطفاً لینک یا شناسه صحیح وارد کنید';
   }
+  
+  if (message.includes('شما قبلاً با اضافه کردن این فیلم، رأی خود را داده‌اید')) {
+    return 'شما قبلاً با اضافه کردن این فیلم، رأی خود را داده‌اید';
+  }
 
   // Default error messages
   if (message.includes('voteForMovie')) {

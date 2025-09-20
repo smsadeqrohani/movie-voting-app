@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import { api } from '../convex/_generated/api';
 import { extractImdbId, isValidImdbUrl } from '../utils/imdbUtils';
 import { getCleanErrorMessage } from '../utils/errorUtils';
+import { getSessionId } from '../utils/sessionUtils';
 import { Search, Plus, Loader2 } from 'lucide-react';
 import './SearchBox.css';
 
@@ -38,7 +39,8 @@ const SearchBox: React.FC = () => {
       }
 
       // Add content to database (backend will fetch from TMDB)
-      await addMovieWithTMDB({ imdbId });
+      const sessionId = getSessionId();
+      await addMovieWithTMDB({ imdbId, sessionId });
       
       setUrl('');
       setError('');

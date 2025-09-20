@@ -201,6 +201,7 @@ export const getMovieByImdbId = query({
 export const addMovieWithTMDB = action({
   args: {
     imdbId: v.string(),
+    sessionId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // Check if movie already exists
@@ -219,13 +220,13 @@ export const addMovieWithTMDB = action({
     
     const movieId: Id<"movies"> = await ctx.runMutation(api.movies.addMovie, {
       ...movieData,
+      addedBySession: args.sessionId,
     });
     
     // Auto-vote for the person who added the movie
     try {
-      await ctx.runMutation(api.movies.voteForMovie, {
+      await ctx.runMutation(api.movies.autoVoteForMovie, {
         movieId: movieId,
-        sessionId: "auto-vote-adder", // Special session ID for auto-vote
       });
     } catch (error) {
       // If auto-vote fails, don't fail the whole operation
@@ -250,6 +251,7 @@ export const addMovie = mutation({
     genre: v.optional(v.array(v.string())),
     imdbUrl: v.string(),
     addedBy: v.optional(v.string()),
+    addedBySession: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // Check if movie already exists
@@ -272,6 +274,31 @@ export const addMovie = mutation({
   },
 });
 
+// Auto-vote for a movie (used when someone adds a movie)
+export const autoVoteForMovie = mutation({
+  args: { 
+    movieId: v.id("movies"),
+  },
+  handler: async (ctx, args) => {
+    // Add vote record directly
+    await ctx.db.insert("votes", {
+      movieId: args.movieId,
+      sessionId: "auto-vote-adder", // Special session ID for auto-vote
+      votedAt: Date.now(),
+    });
+    
+    // Update movie vote count
+    const movie = await ctx.db.get(args.movieId);
+    if (movie) {
+      await ctx.db.patch(args.movieId, {
+        votes: movie.votes + 1,
+      });
+    }
+    
+    return { success: true };
+  },
+});
+
 // Vote for a movie (with session tracking)
 export const voteForMovie = mutation({
   args: { 
@@ -282,6 +309,17 @@ export const voteForMovie = mutation({
   handler: async (ctx, args) => {
     const now = Date.now();
     const twentyFourHoursAgo = now - (24 * 60 * 60 * 1000);
+    
+    // Get movie info to check who added it
+    const movieRecord = await ctx.db.get(args.movieId);
+    if (!movieRecord) {
+      throw new Error("فیلم یافت نشد");
+    }
+    
+    // Check if the person trying to vote is the one who added the movie
+    if (args.sessionId && movieRecord.addedBySession === args.sessionId) {
+      throw new Error("شما قبلاً با اضافه کردن این فیلم، رأی خود را داده‌اید");
+    }
     
     // Check if session already voted for this movie in the last 24 hours
     // Skip this check for auto-vote

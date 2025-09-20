@@ -16,6 +16,7 @@ export default defineSchema({
     imdbUrl: v.string(),
     addedAt: v.number(),
     addedBy: v.optional(v.string()),
+    addedBySession: v.optional(v.string()), // Session ID of who added the movie
   })
     .index("by_imdb_id", ["imdbId"])
     .index("by_votes", ["votes"])
