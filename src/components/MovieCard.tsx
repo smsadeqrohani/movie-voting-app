@@ -1,6 +1,7 @@
 import React from 'react';
 import { Heart, ExternalLink, Calendar, Star } from 'lucide-react';
 import moment from 'moment-jalaali';
+import { getImageUrl } from '../utils/imageUtils';
 import './MovieCard.css';
 
 interface Movie {
@@ -49,7 +50,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onVote }) => {
     <div className="movie-card">
       <div className="movie-poster">
         {movie.poster ? (
-          <img src={movie.poster} alt={movie.title} />
+          <img src={getImageUrl(movie.poster)} alt={movie.title} />
         ) : (
           <div className="no-poster">
             <span>بدون تصویر</span>

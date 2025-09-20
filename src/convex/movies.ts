@@ -56,9 +56,9 @@ async function fetchMovieDataFromTMDB(imdbId: string) {
       // Get genres
       const genres = details.genres?.map((genre: any) => genre.name) || [];
       
-      // Get poster URL
+      // Get poster URL (using proxy)
       const poster = details.poster_path ? 
-        `https://image.tmdb.org/t/p/w500${details.poster_path}` : undefined;
+        `/image-proxy?url=${encodeURIComponent(`https://image.tmdb.org/t/p/w500${details.poster_path}`)}` : undefined;
       
       // Get year from release date
       const year = details.release_date ? 
@@ -108,9 +108,9 @@ async function fetchMovieDataFromTMDB(imdbId: string) {
       // Get genres
       const genres = details.genres?.map((genre: any) => genre.name) || [];
       
-      // Get poster URL
+      // Get poster URL (using proxy)
       const poster = details.poster_path ? 
-        `https://image.tmdb.org/t/p/w500${details.poster_path}` : undefined;
+        `/image-proxy?url=${encodeURIComponent(`https://image.tmdb.org/t/p/w500${details.poster_path}`)}` : undefined;
       
       // Get year from first air date
       const year = details.first_air_date ? 
@@ -304,3 +304,4 @@ export const getMovieById = query({
     return movie;
   },
 });
+
