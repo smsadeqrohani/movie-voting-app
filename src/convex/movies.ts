@@ -88,6 +88,9 @@ async function fetchMovieDataFromTMDB(imdbId: string, ctx: any) {
         imdbRating: undefined, // TMDB doesn't provide IMDb rating directly
         genre: genres,
         imdbUrl: `https://www.imdb.com/title/${imdbId}/`,
+        isDouble: false,
+        hasSubtitle: false,
+        hasContentIssue: false,
       };
     }
     
@@ -152,6 +155,9 @@ async function fetchMovieDataFromTMDB(imdbId: string, ctx: any) {
         imdbRating: undefined, // TMDB doesn't provide IMDb rating directly
         genre: genres,
         imdbUrl: `https://www.imdb.com/title/${imdbId}/`,
+        isDouble: false,
+        hasSubtitle: false,
+        hasContentIssue: false,
       };
     }
     
@@ -172,8 +178,15 @@ export const getAllMovies = query({
       .query("movies")
       .collect();
     
+    // Filter out movies that have been reviewed (have any special property set to true)
+    const unreviewedMovies = movies.filter((movie: Doc<"movies">) => 
+      movie.isDouble !== true && 
+      movie.hasSubtitle !== true && 
+      movie.hasContentIssue !== true
+    );
+    
     // Sort by votes (descending) then by addedAt (ascending - earlier requests first)
-    return movies.sort((a: Doc<"movies">, b: Doc<"movies">) => {
+    return unreviewedMovies.sort((a: Doc<"movies">, b: Doc<"movies">) => {
       // First sort by votes (higher votes first)
       if (a.votes !== b.votes) {
         return b.votes - a.votes;
@@ -252,6 +265,9 @@ export const addMovie = mutation({
     imdbUrl: v.string(),
     addedBy: v.optional(v.string()),
     addedBySession: v.optional(v.string()),
+    isDouble: v.optional(v.boolean()),
+    hasSubtitle: v.optional(v.boolean()),
+    hasContentIssue: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     // Check if movie already exists
@@ -376,6 +392,57 @@ export const getMovieById = query({
   handler: async (ctx, args) => {
     const movie = await ctx.db.get(args.movieId);
     return movie;
+  },
+});
+
+// Get movies with special properties (any of the three flags set to true)
+export const getMoviesWithSpecialProperties = query({
+  args: {},
+  handler: async (ctx: any) => {
+    const movies = await ctx.db
+      .query("movies")
+      .collect();
+    
+    // Filter movies that have at least one special property set to true
+    const specialMovies = movies.filter((movie: Doc<"movies">) => 
+      movie.isDouble === true || 
+      movie.hasSubtitle === true || 
+      movie.hasContentIssue === true
+    );
+    
+    // Sort by votes (descending) then by addedAt (ascending - earlier requests first)
+    return specialMovies.sort((a: Doc<"movies">, b: Doc<"movies">) => {
+      // First sort by votes (higher votes first)
+      if (a.votes !== b.votes) {
+        return b.votes - a.votes;
+      }
+      // If votes are equal, sort by request time (earlier requests first)
+      return a.addedAt - b.addedAt;
+    });
+  },
+});
+
+// Update movie special properties
+export const updateMovieSpecialProperties = mutation({
+  args: {
+    movieId: v.id("movies"),
+    isDouble: v.optional(v.boolean()),
+    hasSubtitle: v.optional(v.boolean()),
+    hasContentIssue: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const movie = await ctx.db.get(args.movieId);
+    if (!movie) {
+      throw new Error("فیلم یافت نشد");
+    }
+    
+    await ctx.db.patch(args.movieId, {
+      isDouble: args.isDouble,
+      hasSubtitle: args.hasSubtitle,
+      hasContentIssue: args.hasContentIssue,
+    });
+    
+    return { success: true };
   },
 });
 

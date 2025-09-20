@@ -17,6 +17,10 @@ export default defineSchema({
     addedAt: v.number(),
     addedBy: v.optional(v.string()),
     addedBySession: v.optional(v.string()), // Session ID of who added the movie
+    // Special properties
+    isDouble: v.optional(v.boolean()), // double ezafe shod
+    hasSubtitle: v.optional(v.boolean()), // ba zirnevis ezafe shod
+    hasContentIssue: v.optional(v.boolean()), // moshkele mohtavai darad
   })
     .index("by_imdb_id", ["imdbId"])
     .index("by_votes", ["votes"])

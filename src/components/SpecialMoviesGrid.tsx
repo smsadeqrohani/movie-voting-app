@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import { api } from '../convex/_generated/api';
 import { getSessionId } from '../utils/sessionUtils';
 import { getCleanErrorMessage } from '../utils/errorUtils';
-import MovieCard from './MovieCard';
+import SpecialMovieCard from './SpecialMovieCard';
 import { Loader2 } from 'lucide-react';
 import './MovieGrid.css';
 
@@ -27,8 +27,8 @@ interface Movie {
   hasContentIssue?: boolean;
 }
 
-const MovieGrid: React.FC = () => {
-  const movies = useQuery(api.movies.getAllMovies);
+const SpecialMoviesGrid: React.FC = () => {
+  const movies = useQuery(api.movies.getMoviesWithSpecialProperties);
   const voteForMovie = useMutation(api.movies.voteForMovie);
 
   const handleVote = async (movieId: string) => {
@@ -46,6 +46,7 @@ const MovieGrid: React.FC = () => {
     }
   };
 
+
   if (movies === undefined) {
     return (
       <div className="loading-container">
@@ -58,18 +59,18 @@ const MovieGrid: React.FC = () => {
   if (movies.length === 0) {
     return (
       <div className="empty-state">
-        <h3>هنوز محتوایی اضافه نشده است</h3>
-        <p>اولین فیلم یا سریال را با وارد کردن لینک IMDb اضافه کنید</p>
+        <h3>هنوز محتوایی بررسی نشده است</h3>
+        <p>محتوای بررسی شده در اینجا نمایش داده می‌شود</p>
       </div>
     );
   }
 
   return (
     <div className="movie-grid-container">
-      <h2 className="grid-title">محتوای در حال بررسی</h2>
+      <h2 className="grid-title">محتوای بررسی شده</h2>
       <div className="movie-grid">
         {movies.map((movie: Movie) => (
-          <MovieCard
+          <SpecialMovieCard
             key={movie._id}
             movie={movie}
             onVote={() => handleVote(movie._id)}
@@ -80,4 +81,4 @@ const MovieGrid: React.FC = () => {
   );
 };
 
-export default MovieGrid;
+export default SpecialMoviesGrid;

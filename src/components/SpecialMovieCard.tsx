@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Heart, ExternalLink, Calendar, Star } from 'lucide-react';
 import moment from 'moment-jalaali';
 import { useQuery } from 'convex/react';
@@ -25,14 +25,14 @@ interface Movie {
   hasContentIssue?: boolean;
 }
 
-interface MovieCardProps {
+interface SpecialMovieCardProps {
   movie: Movie;
   onVote: () => void;
 }
 
-const MovieCard: React.FC<MovieCardProps> = ({ movie, onVote }) => {
-  const [imageLoading, setImageLoading] = React.useState(true);
-  const [imageError, setImageError] = React.useState(false);
+const SpecialMovieCard: React.FC<SpecialMovieCardProps> = ({ movie, onVote }) => {
+  const [imageLoading, setImageLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
 
   // Get file URL if poster is a storage ID
   const fileUrl = useQuery(
@@ -64,8 +64,29 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onVote }) => {
     return num.toLocaleString('fa-IR');
   };
 
+  const getSpecialPropertyLabels = () => {
+    const labels = [];
+    
+    if (movie.isDouble) {
+      labels.push({ text: 'دوبله اضافه شد', type: 'double', color: '#10b981' });
+    }
+    
+    if (movie.hasSubtitle) {
+      labels.push({ text: 'زیرنویس اضافه شد', type: 'subtitle', color: '#3b82f6' });
+    }
+    
+    if (movie.hasContentIssue) {
+      labels.push({ text: 'مشکل محتوایی دارد', type: 'issue', color: '#ef4444' });
+    }
+    
+    return labels;
+  };
+
+
+  const specialLabels = getSpecialPropertyLabels();
+
   return (
-    <div className="movie-card">
+    <div className="movie-card special-movie-card">
       <div className="movie-poster">
         {movie.poster ? (
           <>
@@ -150,23 +171,17 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onVote }) => {
         </div>
         
         {/* Special Properties Labels */}
-        {(movie.isDouble || movie.hasSubtitle || movie.hasContentIssue) && (
+        {specialLabels.length > 0 && (
           <div className="special-labels">
-            {movie.isDouble && (
-              <span className="special-label" style={{ backgroundColor: '#10b981' }}>
-                دوبله اضافه شد
+            {specialLabels.map((label, index) => (
+              <span 
+                key={index} 
+                className="special-label"
+                style={{ backgroundColor: label.color }}
+              >
+                {label.text}
               </span>
-            )}
-            {movie.hasSubtitle && (
-              <span className="special-label" style={{ backgroundColor: '#3b82f6' }}>
-                زیرنویس اضافه شد
-              </span>
-            )}
-            {movie.hasContentIssue && (
-              <span className="special-label" style={{ backgroundColor: '#ef4444' }}>
-                مشکل محتوایی دارد
-              </span>
-            )}
+            ))}
           </div>
         )}
         
@@ -181,4 +196,4 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onVote }) => {
   );
 };
 
-export default MovieCard;
+export default SpecialMovieCard;

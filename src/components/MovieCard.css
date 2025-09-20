@@ -316,3 +316,31 @@
     padding: 0.75rem;
   }
 }
+
+/* Special Movie Card Styles */
+.special-movie-card {
+  border: 2px solid var(--primary-color);
+  box-shadow: 0 4px 20px rgba(168, 35, 60, 0.2);
+}
+
+.special-movie-card:hover {
+  box-shadow: 0 8px 30px rgba(168, 35, 60, 0.3);
+}
+
+.special-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0.3rem 0;
+}
+
+.special-label {
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
