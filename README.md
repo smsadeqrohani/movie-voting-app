@@ -1,46 +1,124 @@
-# Getting Started with Create React App
+# سیستم درخواست محتوا
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+یک اپلیکیشن React با بک‌اند Convex برای درخواست و رأی‌گیری روی محتوای فیلم‌ها
 
-## Available Scripts
+## ویژگی‌ها
 
-In the project directory, you can run:
+- ✅ افزودن فیلم با لینک IMDb
+- ✅ سیستم رأی‌گیری
+- ✅ مرتب‌سازی بر اساس تعداد رأی
+- ✅ حالت تاریک/روشن
+- ✅ پشتیبانی از زبان فارسی و RTL
+- ✅ تاریخ‌های شمسی (جلالی)
+- ✅ طراحی مدرن با افکت شیشه‌ای
+- ✅ رنگ‌های سفارشی (#A8233C و #007A7A)
 
-### `npm start`
+## نصب و راه‌اندازی
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### پیش‌نیازها
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+- Node.js (نسخه 16 یا بالاتر)
+- npm یا yarn
+- حساب کاربری Convex
 
-### `npm test`
+### مراحل نصب
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+1. **کلون کردن پروژه:**
+```bash
+git clone <repository-url>
+cd movie-voting-app
+```
 
-### `npm run build`
+2. **نصب وابستگی‌ها:**
+```bash
+npm install
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+3. **راه‌اندازی Convex:**
+```bash
+npx convex dev
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+4. **اطلاعات فیلم‌ها:**
+   - اپلیکیشن از TMDB API برای دریافت اطلاعات واقعی فیلم‌ها استفاده می‌کند
+   - نام، عکس، کارگردان، بازیگران، ژانر و توضیحات فیلم از TMDB دریافت می‌شود
+   - API Key از قبل تنظیم شده و نیازی به تنظیم اضافی نیست
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+5. **اجرای پروژه:**
+```bash
+npm start
+```
 
-### `npm run eject`
+## استفاده
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+1. لینک IMDb یا شناسه فیلم (مثل: tt0111161) را در جعبه جستجو وارد کنید
+2. اطلاعات فیلم از TMDB دریافت و در دیتابیس ذخیره می‌شود
+3. روی قلب کلیک کنید تا به فیلم رأی دهید
+4. فیلم‌ها بر اساس تعداد رأی‌ها مرتب می‌شوند
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### مثال‌های ورودی:
+- `https://www.imdb.com/title/tt0111161/`
+- `tt0111161`
+- `tt0068646`
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## ساختار پروژه
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+```
+src/
+├── components/          # کامپوننت‌های React
+│   ├── SearchBox.tsx   # جعبه جستجو
+│   ├── MovieGrid.tsx   # گرید فیلم‌ها
+│   ├── MovieCard.tsx   # کارت فیلم
+│   └── ThemeToggle.tsx # دکمه تغییر تم
+├── contexts/           # Context های React
+│   └── ThemeContext.tsx
+├── convex/            # فایل‌های Convex
+│   ├── schema.ts      # اسکیمای دیتابیس
+│   └── movies.ts      # توابع دیتابیس
+├── services/          # سرویس‌های خارجی
+│   └── movieService.ts
+└── utils/             # توابع کمکی
+    └── imdbUtils.ts
+```
 
-## Learn More
+## API های استفاده شده
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- **Convex**: بک‌اند و دیتابیس
+- **TMDB API**: دریافت اطلاعات واقعی فیلم‌ها (نام، عکس، کارگردان، بازیگران)
+- **Lucide React**: آیکون‌ها
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## سفارشی‌سازی
+
+### تغییر رنگ‌ها
+
+رنگ‌های اصلی و ثانویه در فایل `src/App.css` تعریف شده‌اند:
+
+```css
+:root {
+  --primary-color: #A8233C;
+  --secondary-color: #007A7A;
+}
+```
+
+### تغییر فونت
+
+فونت اصلی در فایل `src/App.css` تعریف شده:
+
+```css
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+```
+
+## مشارکت
+
+برای مشارکت در پروژه:
+
+1. Fork کنید
+2. یک branch جدید ایجاد کنید
+3. تغییرات خود را commit کنید
+4. Pull Request ارسال کنید
+
+## مجوز
+
+این پروژه تحت مجوز MIT منتشر شده است.
