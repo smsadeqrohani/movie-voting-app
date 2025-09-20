@@ -20,12 +20,12 @@ const SearchBox: React.FC = () => {
     setError('');
     
     if (!url.trim()) {
-      setError('لطفاً لینک IMDb یا شناسه فیلم را وارد کنید');
+      setError('لطفاً لینک IMDb یا شناسه فیلم/سریال را وارد کنید');
       return;
     }
 
     if (!isValidImdbUrl(url)) {
-      setError('لینک IMDb یا شناسه فیلم نامعتبر است');
+      setError('لینک IMDb یا شناسه فیلم/سریال نامعتبر است');
       return;
     }
 
@@ -34,24 +34,24 @@ const SearchBox: React.FC = () => {
     try {
       const imdbId = extractImdbId(url);
       if (!imdbId) {
-        setError('نمی‌توان شناسه فیلم را استخراج کرد');
+        setError('نمی‌توان شناسه فیلم/سریال را استخراج کرد');
         return;
       }
 
-      // Fetch movie data
+      // Fetch content data
       const movieData = await fetchMovieData(imdbId);
       
       if (!movieData) {
-        setError('فیلم در TMDB یافت نشد. لطفاً لینک یا شناسه صحیح وارد کنید');
+        setError('محتوای مورد نظر در TMDB یافت نشد. لطفاً لینک یا شناسه صحیح وارد کنید');
         return;
       }
 
-      // Add movie to database
+      // Add content to database
       await addMovie(movieData);
       
       setUrl('');
       setError('');
-      toast.success(`فیلم "${movieData.title}" با موفقیت اضافه شد! 🎬`);
+      toast.success(`"${movieData.title}" با موفقیت اضافه شد! 🎬`);
     } catch (err: any) {
       console.error('Error adding movie:', err);
       const cleanMessage = getCleanErrorMessage(err);
@@ -72,7 +72,7 @@ const SearchBox: React.FC = () => {
               type="text"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="لینک IMDb یا شناسه فیلم (مثل: tt0111161) را وارد کنید..."
+              placeholder="لینک IMDb یا شناسه فیلم/سریال (مثل: tt0111161) را وارد کنید..."
               className="search-input"
               disabled={isLoading}
             />
@@ -87,7 +87,7 @@ const SearchBox: React.FC = () => {
             ) : (
               <Plus size={20} />
             )}
-            {isLoading ? 'در حال پردازش...' : 'افزودن فیلم'}
+            {isLoading ? 'در حال پردازش...' : 'افزودن محتوا'}
           </button>
         </div>
         

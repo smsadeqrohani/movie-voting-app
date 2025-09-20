@@ -19,9 +19,9 @@ const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
 export async function fetchMovieData(imdbId: string): Promise<MovieData | null> {
   try {
-    console.log(`Fetching movie data for IMDb ID: ${imdbId}`);
+    console.log(`Fetching content data for IMDb ID: ${imdbId}`);
     
-    // Step 1: Find movie by IMDb ID using TMDB's find endpoint
+    // Step 1: Find content by IMDb ID using TMDB's find endpoint
     const findResponse = await axios.get(`${TMDB_BASE_URL}/find/${imdbId}`, {
       params: {
         external_source: 'imdb_id'
@@ -33,6 +33,7 @@ export async function fetchMovieData(imdbId: string): Promise<MovieData | null> 
       timeout: 10000
     });
 
+    // Check for movies first
     if (findResponse.data.movie_results && findResponse.data.movie_results.length > 0) {
       const movie = findResponse.data.movie_results[0];
       console.log(`Found movie in TMDB: ${movie.title}`);
@@ -85,7 +86,59 @@ export async function fetchMovieData(imdbId: string): Promise<MovieData | null> 
       };
     }
     
-    console.log('No movie found in TMDB for this IMDb ID');
+    // Check for TV series
+    if (findResponse.data.tv_results && findResponse.data.tv_results.length > 0) {
+      const tvShow = findResponse.data.tv_results[0];
+      console.log(`Found TV series in TMDB: ${tvShow.name}`);
+      
+      // Step 2: Get detailed information including credits
+      const detailsResponse = await axios.get(`${TMDB_BASE_URL}/tv/${tvShow.id}`, {
+        params: {
+          append_to_response: 'credits,external_ids'
+        },
+        headers: {
+          'Authorization': `Bearer ${TMDB_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        timeout: 10000
+      });
+
+      const details = detailsResponse.data;
+      
+      // For TV series, we'll use creator instead of director
+      const creator = details.created_by && details.created_by.length > 0 ? 
+        details.created_by[0].name : undefined;
+      
+      // Get top 5 actors
+      const actors = details.credits?.cast?.slice(0, 5).map((actor: any) => actor.name) || [];
+      
+      // Get genres
+      const genres = details.genres?.map((genre: any) => genre.name) || [];
+      
+      // Get poster URL
+      const poster = details.poster_path ? 
+        `https://image.tmdb.org/t/p/w500${details.poster_path}` : undefined;
+      
+      // Get year from first air date
+      const year = details.first_air_date ? 
+        new Date(details.first_air_date).getFullYear() : 
+        new Date().getFullYear();
+      
+      return {
+        imdbId: imdbId,
+        title: details.name,
+        year: year,
+        director: creator, // Using creator for TV series
+        actors: actors,
+        plot: details.overview,
+        poster: poster,
+        imdbRating: undefined, // TMDB doesn't provide IMDb rating directly
+        genre: genres,
+        imdbUrl: `https://www.imdb.com/title/${imdbId}/`,
+      };
+    }
+    
+    console.log('No content found in TMDB for this IMDb ID');
     return null;
     
   } catch (error) {

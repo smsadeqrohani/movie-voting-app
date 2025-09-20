@@ -47,7 +47,7 @@ const MovieGrid: React.FC = () => {
     return (
       <div className="loading-container">
         <Loader2 className="animate-spin" size={32} />
-        <p>در حال بارگذاری فیلم‌ها...</p>
+        <p>در حال بارگذاری محتوا...</p>
       </div>
     );
   }
@@ -55,8 +55,8 @@ const MovieGrid: React.FC = () => {
   if (movies.length === 0) {
     return (
       <div className="empty-state">
-        <h3>هنوز فیلمی اضافه نشده است</h3>
-        <p>اولین فیلم را با وارد کردن لینک IMDb اضافه کنید</p>
+        <h3>هنوز محتوایی اضافه نشده است</h3>
+        <p>اولین فیلم یا سریال را با وارد کردن لینک IMDb اضافه کنید</p>
       </div>
     );
   }

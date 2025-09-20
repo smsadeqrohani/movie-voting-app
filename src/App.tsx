@@ -18,7 +18,7 @@ function App() {
           <ThemeToggle />
           <header className="app-header">
             <h1 className="app-title">سیستم درخواست محتوا</h1>
-            <p className="app-subtitle">لینک IMDb فیلم مورد نظر خود را وارد کنید</p>
+            <p className="app-subtitle">لینک IMDb فیلم یا سریال مورد نظر خود را وارد کنید</p>
           </header>
           
           <main className="app-main">
