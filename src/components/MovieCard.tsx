@@ -1,7 +1,9 @@
 import React from 'react';
 import { Heart, ExternalLink, Calendar, Star } from 'lucide-react';
 import moment from 'moment-jalaali';
-import { getImageUrl } from '../utils/imageUtils';
+import { useQuery } from 'convex/react';
+import { api } from '../convex/_generated/api';
+import { Id } from '../convex/_generated/dataModel';
 import './MovieCard.css';
 
 interface Movie {
@@ -26,6 +28,19 @@ interface MovieCardProps {
 }
 
 const MovieCard: React.FC<MovieCardProps> = ({ movie, onVote }) => {
+  const [imageLoading, setImageLoading] = React.useState(true);
+  const [imageError, setImageError] = React.useState(false);
+
+  // Get file URL if poster is a storage ID
+  const fileUrl = useQuery(
+    api.movies.getFileUrl,
+    movie.poster && !movie.poster.startsWith('http') 
+      ? { storageId: movie.poster as Id<"_storage"> }
+      : "skip"
+  );
+
+  const imageSrc = movie.poster?.startsWith('http') ? movie.poster : fileUrl;
+
   const formatDate = (timestamp: number) => {
     const jalaaliDate = moment(timestamp).format('jYYYY/jMM/jDD');
     // Convert English numbers to Persian numbers
@@ -50,7 +65,28 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onVote }) => {
     <div className="movie-card">
       <div className="movie-poster">
         {movie.poster ? (
-          <img src={getImageUrl(movie.poster)} alt={movie.title} />
+          <>
+            {imageLoading && !imageError && (
+              <div className="image-shimmer" />
+            )}
+            <img 
+              src={imageSrc || undefined}
+              alt={movie.title}
+              style={{ 
+                display: imageLoading && !imageError ? 'none' : 'block' 
+              }}
+              onLoad={() => setImageLoading(false)}
+              onError={() => {
+                setImageLoading(false);
+                setImageError(true);
+              }}
+            />
+            {imageError && (
+              <div className="no-poster">
+                <span>خطا در بارگذاری تصویر</span>
+              </div>
+            )}
+          </>
         ) : (
           <div className="no-poster">
             <span>بدون تصویر</span>

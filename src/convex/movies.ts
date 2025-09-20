@@ -8,7 +8,7 @@ const TMDB_API_KEY = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhZDMxNTk0ZTdkNGY0ZjgwZGMwM
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
 // Fetch movie/TV data from TMDB API
-async function fetchMovieDataFromTMDB(imdbId: string) {
+async function fetchMovieDataFromTMDB(imdbId: string, ctx: any) {
   try {
     console.log(`Fetching content data for IMDb ID: ${imdbId}`);
     
@@ -56,9 +56,21 @@ async function fetchMovieDataFromTMDB(imdbId: string) {
       // Get genres
       const genres = details.genres?.map((genre: any) => genre.name) || [];
       
-      // Get poster URL (using proxy)
-      const poster = details.poster_path ? 
-        `/image-proxy?url=${encodeURIComponent(`https://image.tmdb.org/t/p/w500${details.poster_path}`)}` : undefined;
+      // Get poster and save to Convex Files
+      let poster = undefined;
+      if (details.poster_path) {
+        try {
+          const imageUrl = `https://image.tmdb.org/t/p/w500${details.poster_path}`;
+          const imageResponse = await fetch(imageUrl);
+          if (imageResponse.ok) {
+            const imageBuffer = await imageResponse.arrayBuffer();
+            const fileId = await ctx.storage.store(new Blob([imageBuffer], { type: 'image/jpeg' }));
+            poster = fileId;
+          }
+        } catch (error) {
+          console.error('Error saving poster to Convex Files:', error);
+        }
+      }
       
       // Get year from release date
       const year = details.release_date ? 
@@ -108,9 +120,21 @@ async function fetchMovieDataFromTMDB(imdbId: string) {
       // Get genres
       const genres = details.genres?.map((genre: any) => genre.name) || [];
       
-      // Get poster URL (using proxy)
-      const poster = details.poster_path ? 
-        `/image-proxy?url=${encodeURIComponent(`https://image.tmdb.org/t/p/w500${details.poster_path}`)}` : undefined;
+      // Get poster and save to Convex Files
+      let poster = undefined;
+      if (details.poster_path) {
+        try {
+          const imageUrl = `https://image.tmdb.org/t/p/w500${details.poster_path}`;
+          const imageResponse = await fetch(imageUrl);
+          if (imageResponse.ok) {
+            const imageBuffer = await imageResponse.arrayBuffer();
+            const fileId = await ctx.storage.store(new Blob([imageBuffer], { type: 'image/jpeg' }));
+            poster = fileId;
+          }
+        } catch (error) {
+          console.error('Error saving poster to Convex Files:', error);
+        }
+      }
       
       // Get year from first air date
       const year = details.first_air_date ? 
@@ -187,7 +211,7 @@ export const addMovieWithTMDB = action({
     }
     
     // Fetch data from TMDB
-    const movieData = await fetchMovieDataFromTMDB(args.imdbId);
+    const movieData = await fetchMovieDataFromTMDB(args.imdbId, ctx);
     
     if (!movieData) {
       throw new Error("محتوای مورد نظر در TMDB یافت نشد. لطفاً لینک یا شناسه صحیح وارد کنید");
@@ -302,6 +326,14 @@ export const getMovieById = query({
   handler: async (ctx, args) => {
     const movie = await ctx.db.get(args.movieId);
     return movie;
+  },
+});
+
+// Get file URL from storage ID
+export const getFileUrl = query({
+  args: { storageId: v.id("_storage") },
+  handler: async (ctx, args) => {
+    return await ctx.storage.getUrl(args.storageId);
   },
 });
 
