@@ -20,8 +20,16 @@ export function getCleanErrorMessage(error: any): string {
     return 'این فیلم قبلاً اضافه شده است';
   }
   
+  if (message.includes('این محتوا قبلاً اضافه شده است')) {
+    return 'این محتوا قبلاً اضافه شده است';
+  }
+  
   if (message.includes('فیلم در TMDB یافت نشد')) {
     return 'فیلم در TMDB یافت نشد. لطفاً لینک یا شناسه صحیح وارد کنید';
+  }
+  
+  if (message.includes('محتوای مورد نظر در TMDB یافت نشد')) {
+    return 'محتوای مورد نظر در TMDB یافت نشد. لطفاً لینک یا شناسه صحیح وارد کنید';
   }
 
   // Default error messages
