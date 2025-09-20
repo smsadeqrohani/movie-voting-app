@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { useMutation } from 'convex/react';
+import { useAction } from 'convex/react';
 import { toast } from 'react-toastify';
 import { api } from '../convex/_generated/api';
 import { extractImdbId, isValidImdbUrl } from '../utils/imdbUtils';
 import { getCleanErrorMessage } from '../utils/errorUtils';
-import { fetchMovieData } from '../services/movieService';
 import { Search, Plus, Loader2 } from 'lucide-react';
 import './SearchBox.css';
 
@@ -13,7 +12,7 @@ const SearchBox: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const addMovie = useMutation(api.movies.addMovie);
+  const addMovieWithTMDB = useAction(api.movies.addMovieWithTMDB);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,20 +37,12 @@ const SearchBox: React.FC = () => {
         return;
       }
 
-      // Fetch content data
-      const movieData = await fetchMovieData(imdbId);
-      
-      if (!movieData) {
-        setError('محتوای مورد نظر در TMDB یافت نشد. لطفاً لینک یا شناسه صحیح وارد کنید');
-        return;
-      }
-
-      // Add content to database
-      await addMovie(movieData);
+      // Add content to database (backend will fetch from TMDB)
+      await addMovieWithTMDB({ imdbId });
       
       setUrl('');
       setError('');
-      toast.success(`"${movieData.title}" با موفقیت اضافه شد! 🎬`);
+      toast.success('محتوای مورد نظر با موفقیت اضافه شد! 🎬');
     } catch (err: any) {
       console.error('Error adding movie:', err);
       const cleanMessage = getCleanErrorMessage(err);
