@@ -65,124 +65,131 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, onVote }) => {
   };
 
   return (
-    <div className="movie-card">
-      <div className="movie-poster">
-        {movie.poster ? (
-          <>
-            {imageLoading && !imageError && (
-              <div className="image-shimmer" />
-            )}
-            <img 
-              src={imageSrc || undefined}
-              alt={movie.title}
-              style={{ 
-                display: imageLoading && !imageError ? 'none' : 'block' 
-              }}
-              onLoad={() => setImageLoading(false)}
-              onError={() => {
-                setImageLoading(false);
-                setImageError(true);
-              }}
-            />
-            {imageError && (
-              <div className="no-poster">
-                <span>خطا در بارگذاری تصویر</span>
+    <div className="movie-card horizontal-card">
+      <div className="movie-content">
+        <div className="movie-info">
+          <div className="movie-header">
+            <h3 className="movie-title">{movie.title}</h3>
+            <a
+              href={movie.imdbUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="imdb-link"
+            >
+              <ExternalLink size={16} />
+            </a>
+          </div>
+          
+          <div className="movie-meta">
+            <div className="meta-item">
+              <Calendar size={14} />
+              <span>{movie.year}</span>
+            </div>
+            
+            {movie.imdbRating && (
+              <div className="meta-item">
+                <Star size={14} />
+                <span>{movie.imdbRating.toFixed(1)}</span>
               </div>
             )}
-          </>
-        ) : (
-          <div className="no-poster">
-            <span>بدون تصویر</span>
-          </div>
-        )}
-        <div className="movie-overlay">
-          <button className="vote-button" onClick={onVote}>
-            <Heart size={20} />
-            رأی دهید
-          </button>
-        </div>
-      </div>
-      
-      <div className="movie-info">
-        <div className="movie-header">
-          <h3 className="movie-title">{movie.title}</h3>
-          <a
-            href={movie.imdbUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="imdb-link"
-          >
-            <ExternalLink size={16} />
-          </a>
-        </div>
-        
-        <div className="movie-meta">
-          <div className="meta-item">
-            <Calendar size={14} />
-            <span>{movie.year}</span>
+            
+            {movie.genre && movie.genre.length > 0 && (
+              <div className="movie-genres">
+                {movie.genre.map((g, index) => (
+                  <span key={index} className="genre-tag">
+                    {g}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
           
-          {movie.imdbRating && (
-            <div className="meta-item">
-              <Star size={14} />
-              <span>{movie.imdbRating.toFixed(1)}</span>
+          {/* Movie Description */}
+          {movie.plot && (
+            <div className="movie-description">
+              <p>{movie.plot}</p>
             </div>
           )}
           
-          {movie.genre && movie.genre.length > 0 && (
-            <div className="movie-genres">
-              {movie.genre.map((g, index) => (
-                <span key={index} className="genre-tag">
-                  {g}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-        
-        {/* Vote count - beautiful and prominent */}
-        <div className="beautiful-vote-section" onClick={onVote}>
-          <div className="vote-content">
-            <Heart size={20} className="vote-icon" />
-            <div className="vote-text">
-              <span className="vote-number">{formatNumber(movie.votes)}</span>
-              <span className="vote-label">رأی</span>
-            </div>
+          {/* Status Labels */}
+          <div className="status-labels">
+            {(movie.isDouble || movie.hasSubtitle || movie.hasContentIssue) ? (
+              <>
+                {movie.isDouble && (
+                  <span className="status-label" style={{ backgroundColor: '#10b981' }}>
+                    دوبله اضافه شد
+                  </span>
+                )}
+                {movie.hasSubtitle && (
+                  <span className="status-label" style={{ backgroundColor: '#3b82f6' }}>
+                    زیرنویس اضافه شد
+                  </span>
+                )}
+                {movie.hasContentIssue && (
+                  <span className="status-label" style={{ backgroundColor: '#ef4444' }}>
+                    مشکل محتوایی دارد
+                  </span>
+                )}
+              </>
+            ) : (
+              <span className="status-label waiting" style={{ backgroundColor: '#6b7280' }}>
+                منتظر بررسی
+              </span>
+            )}
+          </div>
+          
+          <div className="movie-footer">
+            <span className="added-date">
+              درخواست شده در {formatDate(movie.addedAt)}
+            </span>
           </div>
         </div>
         
-        {/* Status Labels */}
-        <div className="status-labels">
-          {(movie.isDouble || movie.hasSubtitle || movie.hasContentIssue) ? (
+        <div className="movie-poster">
+          {movie.poster ? (
             <>
-              {movie.isDouble && (
-                <span className="status-label" style={{ backgroundColor: '#10b981' }}>
-                  دوبله اضافه شد
-                </span>
+              {imageLoading && !imageError && (
+                <div className="image-shimmer" />
               )}
-              {movie.hasSubtitle && (
-                <span className="status-label" style={{ backgroundColor: '#3b82f6' }}>
-                  زیرنویس اضافه شد
-                </span>
-              )}
-              {movie.hasContentIssue && (
-                <span className="status-label" style={{ backgroundColor: '#ef4444' }}>
-                  مشکل محتوایی دارد
-                </span>
+              <img 
+                src={imageSrc || undefined}
+                alt={movie.title}
+                style={{ 
+                  display: imageLoading && !imageError ? 'none' : 'block' 
+                }}
+                onLoad={() => setImageLoading(false)}
+                onError={() => {
+                  setImageLoading(false);
+                  setImageError(true);
+                }}
+              />
+              {imageError && (
+                <div className="no-poster">
+                  <span>خطا در بارگذاری تصویر</span>
+                </div>
               )}
             </>
           ) : (
-            <span className="status-label waiting" style={{ backgroundColor: '#6b7280' }}>
-              منتظر بررسی
-            </span>
+            <div className="no-poster">
+              <span>بدون تصویر</span>
+            </div>
           )}
-        </div>
-        
-        
-        <div className="movie-footer">
-          <span className="added-date">
-            درخواست شده در {formatDate(movie.addedAt)}
-          </span>
+          <div className="movie-overlay">
+            <button className="vote-button" onClick={onVote}>
+              <Heart size={20} />
+              رأی دهید
+            </button>
+          </div>
+          
+          {/* Vote count - beautiful and prominent - moved below image */}
+          <div className="beautiful-vote-section" onClick={onVote}>
+            <div className="vote-content">
+              <Heart size={18} className="vote-icon" />
+              <div className="vote-text">
+                <span className="vote-number">{formatNumber(movie.votes)} رأی</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -74,7 +74,7 @@ const MovieGrid: React.FC = () => {
       } : null
     });
     
-    if (movies.length > 0) {
+    if (movies && movies.length > 0) {
       if (currentPage === 1) {
         // First page - replace all movies
         setAllMovies(movies);
@@ -95,7 +95,7 @@ const MovieGrid: React.FC = () => {
       setHasMorePages(pagination.hasNextPage);
       console.log('Updated hasMorePages:', pagination.hasNextPage);
     }
-  }, [movies, currentPage, pagination]);
+  }, [currentPage, pagination]);
 
   // Load more movies when reaching the bottom
   const loadMoreMovies = useCallback(() => {
@@ -142,13 +142,14 @@ const MovieGrid: React.FC = () => {
       }
     );
 
-    if (observerRef.current) {
-      observer.observe(observerRef.current);
+    const currentObserverRef = observerRef.current;
+    if (currentObserverRef) {
+      observer.observe(currentObserverRef);
     }
 
     return () => {
-      if (observerRef.current) {
-        observer.unobserve(observerRef.current);
+      if (currentObserverRef) {
+        observer.unobserve(currentObserverRef);
       }
     };
   }, [hasMorePages, isLoadingMore, loadMoreMovies, currentPage, allMovies.length]);
